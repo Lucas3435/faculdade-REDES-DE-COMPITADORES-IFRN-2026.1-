@@ -3,14 +3,14 @@ def ler_valor(mensagem):
         entrada = input(mensagem)
         # Verifica se há mais de uma vírgula
         if entrada.count(",") > 1:
-            print("❌ Erro: Você digitou mais de uma vírgula!")
-            print("   Use o formato correto: 100.000,00 (ponto para milhar, vírgula para centavos)")
+            print("erro: Você digitou mais de uma vírgula!")
+            print("   use o formato correto: 100.000,00 (ponto para milhar, vírgula para centavos)")
             continue
         try:
             valor = float(entrada.replace(".", "").replace(",", "."))
             return valor
         except ValueError:
-            print("❌ Erro: Digite um número válido!")
+            print("erro: Digite um número válido!")
             continue
 
 valor_conta = ler_valor("valor da conta: ")
