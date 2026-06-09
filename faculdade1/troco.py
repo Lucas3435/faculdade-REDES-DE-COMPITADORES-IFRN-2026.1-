@@ -1,5 +1,5 @@
-valor_conta = float(input("valor da conta: ").replace(",", "."))
-valor_pago = float(input("valor pago: ").replace(",", "."))
+valor_conta = float(input("valor da conta: ").replace(".", "").replace(",", "."))
+valor_pago = float(input("valor pago: ").replace(".", "").replace(",", "."))
 troco_cent = round((valor_pago - valor_conta) * 100)
 if troco_cent < 0:
     print("Pagamento insuficiente")
