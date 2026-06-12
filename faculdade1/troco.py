@@ -1,20 +1,5 @@
-def ler_valor(mensagem):
-    while True:
-        entrada = input(mensagem)
-        # Verifica se há mais de uma vírgula
-        if entrada.count(",") > 1:
-            print("erro: Você digitou mais de uma vírgula!")
-            print("   use o formato correto: 100.000,00 (ponto para milhar, vírgula para centavos)")
-            continue
-        try:
-            valor = float(entrada.replace(".", "").replace(",", "."))
-            return valor
-        except ValueError:
-            print("erro: Digite um número válido!")
-            continue
-
-valor_conta = ler_valor("valor da conta: ")
-valor_pago = ler_valor("valor pago: ")
+valor_conta = float(input("valor da conta: ").replace(".", "").replace(",", "."))
+valor_pago = float(input("valor pago: ").replace(".", "").replace(",", "."))
 troco_cent = round((valor_pago - valor_conta) * 100)
 if troco_cent < 0:
     print("Pagamento insuficiente")
