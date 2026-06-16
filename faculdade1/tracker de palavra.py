@@ -1,5 +1,5 @@
-# tracker de palavras v2
-# conta quantas vezes cada palavra aparece no texto e mostra em ordem decrescente.
+# tracker de palavras
+
 
 texto = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque non sapien et neque laoreet cursus at at nisl.
 Vestibulum ut lacus sem. Suspendisse in sapien purus. Proin nec rhoncus orci. Mauris dapibus ex urna, non dapibus risus scelerisque in.
@@ -14,21 +14,25 @@ Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
 Donec orci diam, dignissim vitae mollis ut, venenatis nec justo. Nulla auctor non tortor nec vehicula. Suspendisse mattis libero at lectus volutpat auctor.
 Mauris eget pulvinar ante."""
 
-# normaliza o texto
+#
+
 texto = texto.lower()
 for caractere in ",.;:":
     texto = texto.replace(caractere, "")
 
 palavras = texto.split()
 
-# conta as palavras
+# 
+
 contagem = {}
 for palavra in palavras:
     contagem[palavra] = contagem.get(palavra, 0) + 1
 
-# ordena da maior para a menor contagem
+# 
+
 resultado = sorted(contagem.items(), key=lambda item: item[1], reverse=True)
 
-# exibe o resultado
+# 
+
 for palavra, quantidade in resultado:
     print(f"{palavra}: {quantidade}")
