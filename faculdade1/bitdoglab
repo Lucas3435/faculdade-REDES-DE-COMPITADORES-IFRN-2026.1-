@@ -1,0 +1,45 @@
+import machine
+import time
+import neopixel
+
+sensor_temp = machine.ADC(4)
+fator_conversao = 3.3 / 65535
+np = neopixel.NeoPixel(machine.Pin(7), 25)
+
+pos = 0          # posição atual (0 a 24)
+direcao = 1      # 1 = vai pra frente, -1 = volta
+
+def cor_por_temperatura(temp):
+    if temp > 40:
+        return (255, 0, 0)      # Vermelha
+    elif temp > 35:
+        return (255, 255, 0)    # Amarela
+    elif temp > 30:
+        return (0, 0, 255)      # Azul
+    elif temp > 25:
+        return (0, 255, 0)      # Verde
+    else:
+        return (0, 0, 0)        # Preta (apagado)
+
+while True:
+    # ê temperatura
+    valor_adc = sensor_temp.read_u16() * fator_conversao
+    temperatura = 27 - (valor_adc - 0.706) / 0.001721
+    cor = cor_por_temperatura(temperatura)
+
+    for i in range(25):
+        np[i] = (0, 0, 0)
+
+    # Acende só a "casinha"
+    np[pos] = cor
+    np.write()
+
+    print("Temp: {:.2f} C | LED: {}".format(temperatura, pos))
+
+    # Anda casinha em casinha
+    pos += direcao
+    if pos == 24 or pos == 0:
+        direcao *= -1
+
+    time.sleep(0.15)  
+    
