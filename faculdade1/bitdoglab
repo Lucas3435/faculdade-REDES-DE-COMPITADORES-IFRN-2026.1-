@@ -21,25 +21,26 @@ def cor_por_temperatura(temp):
     else:
         return (0, 0, 0)        # Preta (apagado)
 
+# opcional: começa tudo apagado uma única vez
+for i in range(25):
+    np[i] = (0, 0, 0)
+np.write()
+
 while True:
-    # ê temperatura
+    # lê temperatura
     valor_adc = sensor_temp.read_u16() * fator_conversao
     temperatura = 27 - (valor_adc - 0.706) / 0.001721
     cor = cor_por_temperatura(temperatura)
 
-    for i in range(25):
-        np[i] = (0, 0, 0)
-
-    # Acende só a "casinha"
+    # acende apenas o LED atual e mantém os anteriores no estado em que ficaram
     np[pos] = cor
     np.write()
 
     print("Temp: {:.2f} C | LED: {}".format(temperatura, pos))
 
-    # Anda casinha em casinha
+    # anda casinha em casinha
     pos += direcao
     if pos == 24 or pos == 0:
         direcao *= -1
 
-    time.sleep(0.15)  
-    
+    time.sleep(0.15)
