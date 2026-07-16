@@ -51,7 +51,7 @@ def cor_por_temperatura(temp_c, t_red):
     elif temp_c > t_red - 15:
         return (0, 10, 0)       # verde
     else:
-        return (0, 10, 0)         # apagado
+        return (0, 0, 0)         # apagado
 
 # inicia apagado
 apagar_matriz()
