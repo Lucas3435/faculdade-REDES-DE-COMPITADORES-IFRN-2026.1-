@@ -2,45 +2,126 @@ import machine
 import time
 import neopixel
 
-sensor_temp = machine.ADC(4)
+#      Sensores  
+sensor_temp = machine.ADC(4)          # sensor interno de temperatura 
 fator_conversao = 3.3 / 65535
+
+#     joystick
+joy_x = machine.ADC(26)               # eixo X (ADC0)
+joy_y = machine.ADC(27)               # eixo Y (ADC1)
+
 np = neopixel.NeoPixel(machine.Pin(7), 25)
 
-pos = 0          # posição atual (0 a 24)
-direcao = 1      # 1 = vai pra frente, -1 = volta
+#     Estado da animação 
+pos = 0
+direcao = 1
 
-def cor_por_temperatura(temp):
-    if temp > 40:
-        return (255, 0, 0)      # Vermelha
-    elif temp > 35:
-        return (255, 255, 0)    # Amarela
-    elif temp > 30:
-        return (0, 0, 255)      # Azul
-    elif temp > 25:
-        return (0, 255, 0)      # Verde
+#     Controle do intervalo entre leituras 
+intervalo = 0.15                      # segundos
+INTERVALO_MIN = 0.0
+INTERVALO_MAX = 2.0
+
+#     Faixas de temperatura
+# mantendo 5 °C entre limiares:
+# vermelho > t_vermelho
+# amarelo  > t_vermelho-5
+# azul     > t_vermelho-10
+# verde    > t_vermelho-15
+# senão apagado
+t_vermelho = 40
+T_VERMELHO_MIN = 25
+T_VERMELHO_MAX = 50
+
+# leitura anterior do joystick
+x_ant = joy_x.read_u16()
+y_ant = joy_y.read_u16()
+
+def apagar_matriz():
+    for i in range(25):
+        np[i] = (0, 0, 0)
+    np.write()
+
+def cor_por_temperatura(temp_c, t_red):
+    if temp_c > t_red:
+        return (10, 0, 0)       # vermelho
+    elif temp_c > t_red - 5:
+        return (10, 10, 0)     # amarelo
+    elif temp_c > t_red - 10:
+        return (0, 0, 10)       # azul
+    elif temp_c > t_red - 15:
+        return (0, 10, 0)       # verde
     else:
-        return (0, 0, 0)        # Preta (apagado)
+        return (0, 10, 0)         # apagado
 
-# opcional: começa tudo apagado uma única vez
-for i in range(25):
-    np[i] = (0, 0, 0)
-np.write()
+# inicia apagado
+apagar_matriz()
 
 while True:
-    # lê temperatura
+    # 1) Lê joystick atual
+    x_atual = joy_x.read_u16()
+    y_atual = joy_y.read_u16()
+
+    dx = x_atual - x_ant
+    dy = y_atual - y_ant
+
+    # 2) Regra do eixo Y -> ajusta intervalo
+    if dy > 2000:
+        intervalo -= 0.1
+    elif dy < -2000:
+        intervalo += 0.1
+
+    # limita entre 0 e 2s
+    if intervalo < INTERVALO_MIN:
+        intervalo = INTERVALO_MIN
+    elif intervalo > INTERVALO_MAX:
+        intervalo = INTERVALO_MAX
+
+    # 3) Regra do eixo X -> ajusta faixas de temperatura
+    mudou_faixa = False
+    if dx > 2000:
+        # aumenta referências em +1°C
+        if t_vermelho < T_VERMELHO_MAX:
+            t_vermelho += 1
+            mudou_faixa = True
+    elif dx < -2000:
+        # diminui referências em -1°C
+        if t_vermelho > T_VERMELHO_MIN:
+            t_vermelho -= 1
+            mudou_faixa = True
+
+    # sempre que mudar faixa, apaga tudo e reinicia gráfico
+    if mudou_faixa:
+        apagar_matriz()
+        pos = 0
+        direcao = 1
+
+    # atualiza "anteriores"
+    x_ant = x_atual
+    y_ant = y_atual
+
+    # 4) Lê temperatura
     valor_adc = sensor_temp.read_u16() * fator_conversao
     temperatura = 27 - (valor_adc - 0.706) / 0.001721
-    cor = cor_por_temperatura(temperatura)
 
-    # acende apenas o LED atual e mantém os anteriores no estado em que ficaram
+    # 5) Atualiza LED atual com cor da faixa
+    cor = cor_por_temperatura(temperatura, t_vermelho)
     np[pos] = cor
     np.write()
 
-    print("Temp: {:.2f} C | LED: {}".format(temperatura, pos))
+    print(
+        "Temp: {:.2f} C | LED: {} | int: {:.2f}s | Tred>{} Tylw>{} Tblu>{} Tgrn>{}".format(
+            temperatura, pos, intervalo,
+            t_vermelho, t_vermelho - 5, t_vermelho - 10, t_vermelho - 15
+        )
+    )
 
-    # anda casinha em casinha
+    # 6) Anda casinha (ida e volta)
     pos += direcao
-    if pos == 24 or pos == 0:
-        direcao *= -1
+    if pos >= 24:
+        pos = 24
+        direcao = -1
+    elif pos <= 0:
+        pos = 0
+        direcao = 1
 
-    time.sleep(0.15)
+    time.sleep(intervalo)
