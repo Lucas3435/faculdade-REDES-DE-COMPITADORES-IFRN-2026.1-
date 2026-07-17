@@ -17,8 +17,8 @@ pos = 0
 direcao = 1
 
 #     Controle do intervalo entre leituras 
-intervalo = 0.15                      # segundos
-INTERVALO_MIN = 0.0
+intervalo = 0.2                   # segundos
+INTERVALO_MIN = 0.02
 INTERVALO_MAX = 2.0
 
 #     Faixas de temperatura
@@ -43,13 +43,13 @@ def apagar_matriz():
 
 def cor_por_temperatura(temp_c, t_red):
     if temp_c > t_red:
-        return (10, 0, 0)       # vermelho
+        return (25, 0, 0)       # vermelho
     elif temp_c > t_red - 5:
-        return (10, 10, 0)     # amarelo
+        return (25, 25, 0)     # amarelo
     elif temp_c > t_red - 10:
-        return (0, 0, 10)       # azul
+        return (0, 0, 25)       # azul
     elif temp_c > t_red - 15:
-        return (0, 10, 0)       # verde
+        return (0, 25, 0)       # verde
     else:
         return (0, 0, 0)         # apagado
 
@@ -59,7 +59,9 @@ apagar_matriz()
 while True:
     # 1) Lê joystick atual
     x_atual = joy_x.read_u16()
+    time.sleep(0.01)
     y_atual = joy_y.read_u16()
+    
 
     dx = x_atual - x_ant
     dy = y_atual - y_ant
@@ -69,7 +71,8 @@ while True:
         intervalo -= 0.1
     elif dy < -2000:
         intervalo += 0.1
-
+        print("aumentando")
+        
     # limita entre 0 e 2s
     if intervalo < INTERVALO_MIN:
         intervalo = INTERVALO_MIN
@@ -109,7 +112,7 @@ while True:
     np.write()
 
     print(
-        "Temp: {:.2f} C | LED: {} | int: {:.2f}s | Tred>{} Tylw>{} Tblu>{} Tgrn>{}".format(
+        f"Temp: {:.2f} C | LED: {} | int: {:.2f}s | Tred>{} Tylw>{} Tblu>{} Tgrn>{}"(
             temperatura, pos, intervalo,
             t_vermelho, t_vermelho - 5, t_vermelho - 10, t_vermelho - 15
         )
